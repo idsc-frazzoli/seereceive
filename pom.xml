@@ -31,11 +31,6 @@
 			<artifactId>owly</artifactId>
 			<version>0.0.7</version>
 		</dependency>
-		<dependency>
-			<groupId>ch.ethz.idsc</groupId>
-			<artifactId>queuey</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
 	</dependencies>
 
 
