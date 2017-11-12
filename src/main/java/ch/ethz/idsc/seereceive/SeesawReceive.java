@@ -9,6 +9,7 @@ public class SeesawReceive {
   public static void main(String[] args) {
     System.out.println("now reading from the seesaw...");
     UartClientInterface seesawclient = new SeesawClient();
+    @SuppressWarnings("unused")
     UartServer seesawServer = UartServer.create(seesawclient);
   }
 }

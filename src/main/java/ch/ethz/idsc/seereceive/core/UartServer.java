@@ -1,5 +1,5 @@
+// code by jph
 package ch.ethz.idsc.seereceive.core;
-//code by jph
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -10,8 +10,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class UartServer {
-  private static final int RX_SIZE = 16573; // this is a prime for absolutely
-  // no reason
+  // this is a prime for absolutely no reason
+  private static final int RX_SIZE = 16573;
   private ByteBuffer rxByteBuffer = ByteBuffer.wrap(new byte[RX_SIZE]);
   private int rx_uart = 0;
   private int rx_available = 0;
