@@ -47,6 +47,7 @@ public class UartServer {
 
   private void connect() throws Exception {
     String myPort = myUartClientInterface.getPort();
+    // FIXME put binary in repo and reference from working directory
     String myCommand = "/home/clruch/Repositories/seesawry/javacom" + " " + myPort + " " + baud;
     System.out.println("now executing: ");
     System.out.println(myCommand);
