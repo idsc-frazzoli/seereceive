@@ -1,0 +1,4 @@
+#! /bin/bash
+# File to run javacom executable
+./javacom /dev/stlinkv2_console 9600
+
