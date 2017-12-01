@@ -7,8 +7,8 @@ import ch.ethz.idsc.owly.data.GlobalAssert;
 public enum SeesawMessage {
 	;
 
-	private static byte[] header = { 'E', 'T', 'H' };
-	private static int length = 33;
+	private static final byte[] header = { 'E', 'T', 'H' };
+	private static final int length = 33;
 	
 	
 	public static int length(){

@@ -16,10 +16,7 @@ public class SeesawClient implements UartClientInterface {
 	private int tLen = SeesawMessage.length() * 2;
 	private int hLen = SeesawMessage.headerlength();
 
-	public Tensor eReceived = Tensors.empty();
-	public Tensor uReceived = Tensors.empty();
-	public Tensor tReceived = Tensors.empty();
-	public Tensor testReceived = Tensors.empty();
+	public Tensor stateReceived = Tensors.empty();
 
 	public void initialize(UartServer uartServer) {
 		this.uartServer = uartServer;
@@ -41,10 +38,13 @@ public class SeesawClient implements UartClientInterface {
 		byte[] bytesReceived = new byte[tLen];
 		if (uartServer.poll(bytesReceived, hLen)) {
 			if (SeesawMessage.startsWithHeader(bytesReceived)) {
+				System.out.println("starts with header");
 				if (uartServer.poll(bytesReceived, tLen)) {
+					System.out.println("poll done");
 					ByteBuffer byteBuffer = ByteBuffer.wrap(bytesReceived);
 					byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 					if (checksumCorrect(byteBuffer)) {
+						System.out.println("checksum ok");
 						processMessage(byteBuffer);
 					} else {
 						uartServer.advance(1);
@@ -94,50 +94,31 @@ public class SeesawClient implements UartClientInterface {
 		System.out.println("=====");
 
 		// print header
-		System.out.println((char) byteBuffer.get(0));
-		System.out.println((char) byteBuffer.get(1));
-		System.out.println((char) byteBuffer.get(2));
+		char c1 = (char) byteBuffer.get();
+		char c2 = (char) byteBuffer.get();
+		char c3 = (char) byteBuffer.get();
+		System.out.println(c1 + "" + c2 + "" + c3);
+
+		byteBuffer.position(hLen); // skip header
+		SeesawState seesawState = new SeesawState(byteBuffer);
+		stateReceived.append(seesawState.toTensor());
 
 		// read time
-		byteBuffer.position(hLen); // skip header
-		int signed = byteBuffer.getInt();
-		long t = signed & 0xffff;
-		tReceived.append(RealScalar.of(t));
-		System.out.println("signed = " + signed);
-		System.out.println("t = " + t);
-
-		// read e
-		byteBuffer.position(hLen + 4);
-		double e = byteBuffer.getDouble();
-		eReceived.append(RealScalar.of(e));
-		System.out.println("e = " + e);
-
-		// read test
-		byteBuffer.position(hLen + 4 + 8);
-		double test = byteBuffer.getDouble();
-		testReceived.append(RealScalar.of(test));
-		System.out.println("test = " + test);
-
-		// read u
-		byteBuffer.position(hLen + 4 + 8 + 8);
-		double u = byteBuffer.getDouble();
-		uReceived.append(RealScalar.of(u));
-		System.out.println("u = " + u);
+		System.out.println("t = " + seesawState.getTime());
+		System.out.println("e = " + seesawState.getError());
+		System.out.println("u = " + seesawState.getControl());
+		System.out.println("test = " + seesawState.getTest());
 
 		uartServer.advance(SeesawMessage.length());
 
-		System.out.println("numReceived = " + eReceived.length());
+		System.out.println("numReceived = " + stateReceived.length());
 
-		if (eReceived.length() == 10000) {
+		if (stateReceived.length() == 3000) { //TODO magic const
 			try {
-				SaveUtils.saveFile(eReceived, "e", MultiFileTools.getWorkingDirectory());
-				SaveUtils.saveFile(uReceived, "u", MultiFileTools.getWorkingDirectory());
-				SaveUtils.saveFile(tReceived, "t", MultiFileTools.getWorkingDirectory());
+				SaveUtils.saveFile(stateReceived, "seesawState", MultiFileTools.getWorkingDirectory());
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 		}
-
 	}
-
 }
