@@ -1,15 +1,14 @@
 package ch.ethz.idsc.seereceive.core;
 
 //code by jph
-
 public interface UartClientInterface {
-	String getPort();
+  String getPort();
 
-	int getBaud();
+  int getBaud();
 
-	void rxBufferEvent();
+  void rxBufferEvent();
 
-	void exitValue();
-	
-	void initialize(UartServer uartServer);
+  void exitValue();
+
+  void initialize(UartServer uartServer);
 }
