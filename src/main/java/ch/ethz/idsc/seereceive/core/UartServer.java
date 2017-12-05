@@ -1,6 +1,7 @@
 // code by jph
 package ch.ethz.idsc.seereceive.core;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -10,8 +11,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class UartServer {
-  // this is a prime for absolutely no reason
-  private static final int RX_SIZE = 16573;
+  private static final int RX_SIZE = 16573; // this is a prime for absolutely
+  // no reason
   private ByteBuffer rxByteBuffer = ByteBuffer.wrap(new byte[RX_SIZE]);
   private int rx_uart = 0;
   private int rx_available = 0;
@@ -47,8 +48,8 @@ public class UartServer {
 
   private void connect() throws Exception {
     String myPort = myUartClientInterface.getPort();
-    // FIXME put binary in repo and reference from working directory
-    String myCommand = "/home/clruch/Repositories/seesawry/javacom" + " " + myPort + " " + baud;
+    File exec = SerialBinary.getExecutable();
+    String myCommand = exec.toString() + " " + myPort + " " + baud;
     System.out.println("now executing: ");
     System.out.println(myCommand);
     myProcess = Runtime.getRuntime().exec(myCommand);

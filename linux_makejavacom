@@ -1,0 +1,3 @@
+#! /bin/bash
+# File to compile javacom.cpp 
+g++ javacom.cpp -o javacom -lpthread

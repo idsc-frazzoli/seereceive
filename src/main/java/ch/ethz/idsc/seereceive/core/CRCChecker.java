@@ -72,7 +72,7 @@ public class CRCChecker {
     if (isFinal)
       new Exception("crc already final").printStackTrace();
     for (int idx = 0; idx < length; ++idx)
-      rotate(message[offset + idx] & 0xff); // "& 0xff" converts to unsigned char in range [0, ... 255]
+      rotate(byte2int(message[offset + idx]));
   }
 
   public int publish() {
@@ -130,5 +130,16 @@ public class CRCChecker {
     ByteBuffer myByteBuffer = ByteBuffer.wrap(message, length, 2);
     myByteBuffer.putShort((short) crc);
     return crc;
+  }
+
+  /** Casts a byte to an unsigned int value. For instance, the byte 0xff will
+   * result in 255 instead of -1
+   * 
+   * @param myByte
+   * the byte, for instance 0xff
+   * @return the non-negative interpretation of byte */
+  private static int byte2int(byte myByte) {
+    int myInt = myByte;
+    return myInt < 0 ? myInt + 256 : myInt;
   }
 }

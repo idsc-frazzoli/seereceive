@@ -4,20 +4,21 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import ch.ethz.idsc.seereceive.utils.SaveUtils;
-import ch.ethz.idsc.tensor.RealScalar;
+import ch.ethz.idsc.seereceive.utils.UserHome;
 import ch.ethz.idsc.tensor.Tensor;
 import ch.ethz.idsc.tensor.Tensors;
 
 public class SeesawClient implements UartClientInterface {
   private final int BAUD = 9600;
-  private final String PORT = "/dev/stlinkv2_console";
+  private final String PORT;
   private UartServer uartServer;
   private int tLen = SeesawMessage.length() * 2;
   private int hLen = SeesawMessage.headerlength();
-  public Tensor eReceived = Tensors.empty();
-  public Tensor uReceived = Tensors.empty();
-  public Tensor tReceived = Tensors.empty();
-  public Tensor testReceived = Tensors.empty();
+  public Tensor stateReceived = Tensors.empty();
+
+  public SeesawClient(String port) {
+    PORT = port;
+  }
 
   public void initialize(UartServer uartServer) {
     this.uartServer = uartServer;
@@ -38,12 +39,16 @@ public class SeesawClient implements UartClientInterface {
     byte[] bytesReceived = new byte[tLen];
     if (uartServer.poll(bytesReceived, hLen)) {
       if (SeesawMessage.startsWithHeader(bytesReceived)) {
+        // System.out.println("starts with header");
         if (uartServer.poll(bytesReceived, tLen)) {
+          // System.out.println("poll done");
           ByteBuffer byteBuffer = ByteBuffer.wrap(bytesReceived);
           byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
           if (checksumCorrect(byteBuffer)) {
+            // System.out.println("checksum ok");
             processMessage(byteBuffer);
           } else {
+            System.err.println("checksum nok");
             uartServer.advance(1);
           }
         } else {
@@ -82,38 +87,23 @@ public class SeesawClient implements UartClientInterface {
   private void processMessage(ByteBuffer byteBuffer) {
     System.out.println("=====");
     // print header
-    System.out.println((char) byteBuffer.get(0));
-    System.out.println((char) byteBuffer.get(1));
-    System.out.println((char) byteBuffer.get(2));
-    // read time
+    char c1 = (char) byteBuffer.get();
+    char c2 = (char) byteBuffer.get();
+    char c3 = (char) byteBuffer.get();
+    System.out.println(c1 + "" + c2 + "" + c3);
     byteBuffer.position(hLen); // skip header
-    int signed = byteBuffer.getInt();
-    long t = signed & 0xffff;
-    tReceived.append(RealScalar.of(t));
-    System.out.println("signed = " + signed);
-    System.out.println("t = " + t);
-    // read e
-    byteBuffer.position(hLen + 4);
-    double e = byteBuffer.getDouble();
-    eReceived.append(RealScalar.of(e));
-    System.out.println("e = " + e);
-    // read test
-    byteBuffer.position(hLen + 4 + 8);
-    double test = byteBuffer.getDouble();
-    testReceived.append(RealScalar.of(test));
-    System.out.println("test = " + test);
-    // read u
-    byteBuffer.position(hLen + 4 + 8 + 8);
-    double u = byteBuffer.getDouble();
-    uReceived.append(RealScalar.of(u));
-    System.out.println("u = " + u);
+    SeesawState seesawState = new SeesawState(byteBuffer);
+    stateReceived.append(seesawState.toTensor());
+    // read time
+    System.out.println("t = " + seesawState.getTime());
+    System.out.println("e = " + seesawState.getError());
+    System.out.println("u = " + seesawState.getControl());
+    System.out.println("test = " + seesawState.getTest());
     uartServer.advance(SeesawMessage.length());
-    System.out.println("numReceived = " + eReceived.length());
-    if (eReceived.length() == 10000) {
+    System.out.println("numReceived = " + stateReceived.length());
+    if (stateReceived.length() == 3000) { // TODO magic const
       try {
-        SaveUtils.saveFile(eReceived, "e", MultiFileTools.getWorkingDirectory());
-        SaveUtils.saveFile(uReceived, "u", MultiFileTools.getWorkingDirectory());
-        SaveUtils.saveFile(tReceived, "t", MultiFileTools.getWorkingDirectory());
+        SaveUtils.saveFile(stateReceived, "seesawState", UserHome.file(""));
       } catch (Exception ex) {
         ex.printStackTrace();
       }
