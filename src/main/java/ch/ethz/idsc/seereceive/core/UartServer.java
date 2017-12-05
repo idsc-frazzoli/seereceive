@@ -21,51 +21,50 @@ public class UartServer {
   private int tx_total = 0;
   // ---
   private volatile boolean isLaunched = true;
-  private Process myProcess = null;
-  private InputStream myInputStream = null;
-  private OutputStream myOutputStream = null;
+  private Process process = null;
+  private InputStream inputStream = null;
+  private OutputStream outputStream = null;
   private final Timer myTimer = new Timer();
-  private final UartClientInterface myUartClientInterface;
+  private final UartClientInterface uartClientInterface;
   private final int baud;
 
   private UartServer(UartClientInterface myUartClientInterface) {
-    this.myUartClientInterface = myUartClientInterface;
+    this.uartClientInterface = myUartClientInterface;
     baud = myUartClientInterface.getBaud();
   }
 
-  public static UartServer create(UartClientInterface myUartClientInterface) {
-    final UartServer myUartServer = new UartServer(myUartClientInterface);
+  public static UartServer create(UartClientInterface uartClientInterface) {
+    final UartServer uartServer = new UartServer(uartClientInterface);
     try {
-      myUartClientInterface.initialize(myUartServer);
-      myUartServer.connect();
-    } catch (Exception myException) {
+      uartClientInterface.initialize(uartServer);
+      uartServer.connect();
+    } catch (Exception exception) {
       Logger.getGlobal().log(Level.SEVERE,
-          "failed to launch UartServer " + myUartClientInterface.getPort() + " " + myUartClientInterface.getBaud() + " " + myException.getMessage() + "\n");
+          "failed to launch UartServer " + uartClientInterface.getPort() + " " + uartClientInterface.getBaud() + " " + exception.getMessage() + "\n");
       return null;
     }
-    return myUartServer;
+    return uartServer;
   }
 
   private void connect() throws Exception {
-    String myPort = myUartClientInterface.getPort();
+    String myPort = uartClientInterface.getPort();
     File exec = SerialBinary.getExecutable();
-    String myCommand = exec.toString() + " " + myPort + " " + baud;
+    String command = exec.toString() + " " + myPort + " " + baud;
     System.out.println("now executing: ");
-    System.out.println(myCommand);
-    myProcess = Runtime.getRuntime().exec(myCommand);
-    myInputStream = myProcess.getInputStream();
-    myOutputStream = myProcess.getOutputStream();
+    System.out.println(command);
+    process = Runtime.getRuntime().exec(command);
+    inputStream = process.getInputStream();
+    outputStream = process.getOutputStream();
     new Thread(new Runnable() {
       @Override
       public void run() {
-        Logger.getGlobal().log(Level.INFO,
-            "UartServer open at port " + myUartClientInterface.getPort() + " with baud " + myUartClientInterface.getBaud() + "\n");
+        Logger.getGlobal().log(Level.INFO, "UartServer open at port " + uartClientInterface.getPort() + " with baud " + uartClientInterface.getBaud() + "\n");
         while (isLaunched)
           try {
-            int length = myInputStream.available();
+            int length = inputStream.available();
             if (0 < length) {
               byte[] myByte = new byte[length];
-              int numRead = myInputStream.read(myByte);
+              int numRead = inputStream.read(myByte);
               for (int c0 = 0; c0 < numRead; ++c0) {
                 rxByteBuffer.put(rx_uart, myByte[c0]);
                 ++rx_uart;
@@ -74,19 +73,19 @@ public class UartServer {
               rx_available += length;
               rx_total += length;
               // ---
-              myUartClientInterface.rxBufferEvent();
-            }
-            try {
-              myProcess.exitValue();
-              isLaunched = false;
-              myUartClientInterface.exitValue();
-            } catch (Exception myException) {
-            }
-            Thread.sleep(10); // this is necessary otherwise cpu
-            // goes up
-          } catch (Exception myException) {
-            myException.printStackTrace();
+              uartClientInterface.rxBufferEvent();
+            } else
+              Thread.sleep(10); // this is necessary otherwise cpu goes up
+          } catch (Exception exception) {
+            exception.printStackTrace();
           }
+        try {
+          process.exitValue();
+          isLaunched = false;
+          uartClientInterface.exitValue();
+        } catch (Exception exception) {
+          // ---
+        }
       }
     }).start();
   }
@@ -151,8 +150,8 @@ public class UartServer {
               String myString = "++"; // TODO what about the
               // friendlyFormat?
               tx_total += myByte.length;
-              myOutputStream.write(myString.getBytes());
-              myOutputStream.flush();
+              outputStream.write(myString.getBytes());
+              outputStream.flush();
               long myLong = (long) (myByte.length) * 9 * 1000 / baud;
               // 9 bits, 1000 ms, blocks until all bytes have been
               // sent
@@ -167,12 +166,12 @@ public class UartServer {
   public void close() {
     isLaunched = false;
     myTimer.cancel();
-    if (myProcess != null)
+    if (process != null)
       try {
         Thread.sleep(10);
-        myProcess.destroy();
-        myProcess.waitFor();
-        Logger.getGlobal().log(Level.INFO, "UartServer terminated with " + myProcess.exitValue() + ".\n");
+        process.destroy();
+        process.waitFor();
+        Logger.getGlobal().log(Level.INFO, "UartServer terminated with " + process.exitValue() + ".\n");
       } catch (Exception myException) {
         myException.printStackTrace();
       }
