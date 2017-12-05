@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import ch.ethz.idsc.seereceive.utils.SaveUtils;
+import ch.ethz.idsc.seereceive.utils.UserHome;
 import ch.ethz.idsc.tensor.Tensor;
 import ch.ethz.idsc.tensor.Tensors;
 
@@ -102,7 +103,7 @@ public class SeesawClient implements UartClientInterface {
     System.out.println("numReceived = " + stateReceived.length());
     if (stateReceived.length() == 3000) { // TODO magic const
       try {
-        SaveUtils.saveFile(stateReceived, "seesawState", MultiFileTools.getWorkingDirectory());
+        SaveUtils.saveFile(stateReceived, "seesawState", UserHome.file(""));
       } catch (Exception ex) {
         ex.printStackTrace();
       }
