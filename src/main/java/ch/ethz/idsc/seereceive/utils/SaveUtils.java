@@ -1,3 +1,4 @@
+// code by clruch
 package ch.ethz.idsc.seereceive.utils;
 
 import java.io.File;
@@ -7,7 +8,6 @@ import java.util.Set;
 
 import ch.ethz.idsc.tensor.Tensor;
 
-/** @author Claudio Ruch */
 // TODO @ Lukas, clean it up
 public enum SaveUtils {
   ;
