@@ -1,5 +1,5 @@
+// code by jph
 package ch.ethz.idsc.seereceive.core;
-//code by jph
 
 import java.io.File;
 import java.io.InputStream;

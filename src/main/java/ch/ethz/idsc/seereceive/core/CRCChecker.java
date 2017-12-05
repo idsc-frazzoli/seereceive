@@ -1,7 +1,7 @@
-package ch.ethz.idsc.seereceive.core;
-
 //code by jph
 //adpated by clruch
+package ch.ethz.idsc.seereceive.core;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -1,6 +1,6 @@
+// code by jph
 package ch.ethz.idsc.seereceive.core;
 
-//code by jph
 public interface UartClientInterface {
   String getPort();
 
