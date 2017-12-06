@@ -11,7 +11,8 @@ enum SeesawReceive {
   public static void main(String[] args) {
     System.out.println("now reading from the seesaw...");
     // private final String PORT = "/dev/stlinkv2_console";
-    UartClientInterface seesawclient = new SeesawClient("/dev/ttyACM1");
+    // /dev/ttyACM1
+    UartClientInterface seesawclient = new SeesawClient("/dev/tty.usbmodem1413");
     UartServer.create(seesawclient);
   }
 }

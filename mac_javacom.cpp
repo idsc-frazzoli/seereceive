@@ -4,7 +4,11 @@
 #include <fcntl.h>
 #include <pthread.h>
 #include <stdio.h>
-#include <sys/io.h>
+#ifdef __APPLE__
+        #include <sys/uio.h>
+#else
+        #include <sys/io.h>
+#endif
 #include <unistd.h>
 
 using namespace std;
