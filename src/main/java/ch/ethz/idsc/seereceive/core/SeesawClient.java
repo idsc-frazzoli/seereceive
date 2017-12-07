@@ -96,9 +96,9 @@ public class SeesawClient implements UartClientInterface {
     stateReceived.append(seesawState.toTensor());
     // read time
     System.out.println("t = " + seesawState.getTime());
-    System.out.println("e = " + seesawState.getError());
+    System.out.println("r = " + seesawState.getReference());
+    System.out.println("y = " + seesawState.getMeasurement());
     System.out.println("u = " + seesawState.getControl());
-    System.out.println("test = " + seesawState.getTest());
     uartServer.advance(SeesawMessage.length());
     System.out.println("numReceived = " + stateReceived.length());
     if (stateReceived.length() == 3000) { // TODO magic const
