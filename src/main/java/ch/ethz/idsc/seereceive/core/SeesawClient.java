@@ -9,6 +9,8 @@ import ch.ethz.idsc.tensor.Tensor;
 import ch.ethz.idsc.tensor.Tensors;
 
 public class SeesawClient implements UartClientInterface {
+  private static final int COUNT = 3000; // TODO magic const
+  // ---
   private final int BAUD = 9600;
   private final String PORT;
   private UartServer uartServer;
@@ -47,6 +49,7 @@ public class SeesawClient implements UartClientInterface {
           if (checksumCorrect(byteBuffer)) {
             // System.out.println("checksum ok");
             processMessage(byteBuffer);
+            uartServer.advance(SeesawMessage.length());
           } else {
             System.err.println("checksum nok");
             uartServer.advance(1);
@@ -99,9 +102,11 @@ public class SeesawClient implements UartClientInterface {
     System.out.println("r = " + seesawState.getReference());
     System.out.println("y = " + seesawState.getMeasurement());
     System.out.println("u = " + seesawState.getControl());
+    
     uartServer.advance(SeesawMessage.length());
+
     System.out.println("numReceived = " + stateReceived.length());
-    if (stateReceived.length() == 3000) { // TODO magic const
+    if (stateReceived.length() == COUNT) {
       try {
         SaveUtils.saveFile(stateReceived, "seesawState", UserHome.file(""));
       } catch (Exception ex) {
