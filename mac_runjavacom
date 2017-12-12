@@ -1,0 +1,4 @@
+#! /bin/bash
+# File to run javacom executable
+./mac_javacom /dev/tty.usbmodem1413 9600
+
