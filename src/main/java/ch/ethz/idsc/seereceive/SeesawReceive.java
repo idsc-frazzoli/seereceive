@@ -32,7 +32,7 @@ public enum SeesawReceive {
     } else {
       Properties properties = new Properties();
       properties.load(new FileInputStream(new File("port.properties")));
-      port = properties.getProperty("port");
+      port = properties.getProperty("port").trim();
     }
     UartClientInterface seesawclient = new SeesawClient(port);
     UartServer.create(seesawclient);
