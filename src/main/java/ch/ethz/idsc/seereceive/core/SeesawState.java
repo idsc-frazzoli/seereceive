@@ -2,14 +2,14 @@ package ch.ethz.idsc.seereceive.core;
 
 import java.nio.ByteBuffer;
 
-import ch.ethz.idsc.tensor.RealScalar;
 import ch.ethz.idsc.tensor.Scalar;
 import ch.ethz.idsc.tensor.Tensor;
 import ch.ethz.idsc.tensor.Tensors;
 import ch.ethz.idsc.tensor.qty.Quantity;
 
 public class SeesawState {
-  private static final double MAGIC = 60.0 / 6600.0; // 60 Grad / 6600 MC output
+  private static final double MSEC_to_SEC = 1E-3;
+  // ---
   private final long timeStamp;
   private final double r;
   private final double y;
@@ -23,11 +23,11 @@ public class SeesawState {
   }
 
   public Tensor toTensor() {
-    return Tensors.vector(timeStamp, r, y, u);
+    return Tensors.vector(timeStamp * MSEC_to_SEC, r, y, u);
   }
 
   public Scalar getTime() {
-    return Quantity.of(timeStamp * 0.001, "s");
+    return Quantity.of(timeStamp * MSEC_to_SEC, "s");
   }
 
   public Scalar getReference() {
