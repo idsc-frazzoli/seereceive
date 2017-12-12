@@ -32,9 +32,9 @@ public enum SeesawReceive {
     } else {
       Properties properties = new Properties();
       properties.load(new FileInputStream(new File("port.properties")));
-      port = properties.getProperty("port").trim();
+      port = properties.getProperty("port");
     }
-    RingBufferExchange ringBufferExchange = new FazeClient(port);
+    RingBufferExchange ringBufferExchange = new FazeClient(port.trim());
     new SeesawClient(ringBufferExchange);
   }
 }
