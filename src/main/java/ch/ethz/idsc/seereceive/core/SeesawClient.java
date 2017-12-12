@@ -102,9 +102,7 @@ public class SeesawClient implements UartClientInterface {
     System.out.println("r = " + seesawState.getReference());
     System.out.println("y = " + seesawState.getMeasurement());
     System.out.println("u = " + seesawState.getControl());
-    
     uartServer.advance(SeesawMessage.length());
-
     System.out.println("numReceived = " + stateReceived.length());
     if (stateReceived.length() == COUNT) {
       try {
