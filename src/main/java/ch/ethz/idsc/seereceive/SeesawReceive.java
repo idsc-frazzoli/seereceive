@@ -8,9 +8,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Properties;
 
+import ch.ethz.idsc.seereceive.core.FazeClient;
+import ch.ethz.idsc.seereceive.core.RingBufferExchange;
 import ch.ethz.idsc.seereceive.core.SeesawClient;
-import ch.ethz.idsc.seereceive.core.UartClientInterface;
-import ch.ethz.idsc.seereceive.core.UartServer;
 
 /** the port has to be configured and may even change between two connects.
  * 
@@ -34,7 +34,7 @@ public enum SeesawReceive {
       properties.load(new FileInputStream(new File("port.properties")));
       port = properties.getProperty("port");
     }
-    UartClientInterface seesawclient = new SeesawClient(port);
-    UartServer.create(seesawclient);
+    RingBufferExchange ringBufferExchange = new FazeClient(port);
+    new SeesawClient(ringBufferExchange);
   }
 }

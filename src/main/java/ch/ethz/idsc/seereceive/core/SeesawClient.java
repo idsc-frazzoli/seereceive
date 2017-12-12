@@ -8,70 +8,59 @@ import ch.ethz.idsc.seereceive.utils.UserHome;
 import ch.ethz.idsc.tensor.Tensor;
 import ch.ethz.idsc.tensor.Tensors;
 
-public class SeesawClient implements UartClientInterface {
+public class SeesawClient implements Runnable {
   private static final int COUNT = 3000; // TODO magic const
+  private static final int hLen = SeesawMessage.headerlength();
+  private static final int tLen = SeesawMessage.length() * 2;
   // ---
-  private final int BAUD = 9600;
-  private final String PORT;
-  private UartServer uartServer;
-  private int tLen = SeesawMessage.length() * 2;
-  private int hLen = SeesawMessage.headerlength();
+  private RingBufferExchange uartServer;
   public Tensor stateReceived = Tensors.empty();
+  private final Thread thread;
 
-  public SeesawClient(String port) {
-    PORT = port;
-  }
-
-  public void initialize(UartServer uartServer) {
+  public SeesawClient(RingBufferExchange uartServer) {
     this.uartServer = uartServer;
+    thread = new Thread(this);
+    thread.start();
   }
 
   @Override
-  public String getPort() {
-    return PORT;
-  }
-
-  @Override
-  public int getBaud() {
-    return BAUD;
-  }
-
-  @Override
-  public void rxBufferEvent() {
-    byte[] bytesReceived = new byte[tLen];
-    if (uartServer.poll(bytesReceived, hLen)) {
-      if (SeesawMessage.startsWithHeader(bytesReceived)) {
-        // System.out.println("starts with header");
-        if (uartServer.poll(bytesReceived, tLen)) {
-          // System.out.println("poll done");
-          ByteBuffer byteBuffer = ByteBuffer.wrap(bytesReceived);
-          byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-          if (checksumCorrect(byteBuffer)) {
-            // System.out.println("checksum ok");
-            processMessage(byteBuffer);
-            uartServer.advance(SeesawMessage.length());
+  public void run() {
+    while (true) {
+      byte[] bytesReceived = new byte[tLen];
+      if (uartServer.peek(bytesReceived, hLen)) {
+        if (SeesawMessage.startsWithHeader(bytesReceived)) {
+          // System.out.println("starts with header");
+          if (uartServer.peek(bytesReceived, tLen)) {
+            // System.out.println("poll done");
+            ByteBuffer byteBuffer = ByteBuffer.wrap(bytesReceived);
+            byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+            if (checksumCorrect(byteBuffer)) {
+              // System.out.println("checksum ok");
+              processMessage(byteBuffer);
+              uartServer.advance(SeesawMessage.length());
+            } else {
+              System.err.println("checksum nok");
+              uartServer.advance(1);
+            }
           } else {
-            System.err.println("checksum nok");
-            uartServer.advance(1);
+            // System.out.println("wait");
+            // message is not complete
           }
         } else {
-          // System.out.println("wait");
-          // message is not complete
+          // System.out.println("invalid hdr");
+          uartServer.advance(1);
         }
       } else {
-        // System.out.println("invalid hdr");
-        uartServer.advance(1);
+        try {
+          Thread.sleep(10);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
       }
     }
   }
 
-  @Override
-  public void exitValue() {
-    System.out.println(" we are now exiting!");
-    // TODO do we need to add anything here?
-  }
-
-  private boolean checksumCorrect(ByteBuffer byteBuffer) {
+  private static boolean checksumCorrect(ByteBuffer byteBuffer) {
     byte[] message = new byte[SeesawMessage.length()];
     for (int i = 0; i < SeesawMessage.length(); ++i) {
       message[i] = byteBuffer.get(i);
@@ -102,9 +91,7 @@ public class SeesawClient implements UartClientInterface {
     System.out.println("r = " + seesawState.getReference());
     System.out.println("y = " + seesawState.getMeasurement());
     System.out.println("u = " + seesawState.getControl());
-    
     uartServer.advance(SeesawMessage.length());
-
     System.out.println("numReceived = " + stateReceived.length());
     if (stateReceived.length() == COUNT) {
       try {

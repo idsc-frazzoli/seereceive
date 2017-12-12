@@ -1,15 +1,14 @@
+// code by clruch and jph
 package ch.ethz.idsc.seereceive.core;
 
 import java.nio.ByteBuffer;
 
-import ch.ethz.idsc.tensor.RealScalar;
 import ch.ethz.idsc.tensor.Scalar;
 import ch.ethz.idsc.tensor.Tensor;
 import ch.ethz.idsc.tensor.Tensors;
 import ch.ethz.idsc.tensor.qty.Quantity;
 
 public class SeesawState {
-  private static final double MAGIC = 60.0 / 6600.0; // 60 Grad / 6600 MC output
   private final long timeStamp;
   private final double r;
   private final double y;

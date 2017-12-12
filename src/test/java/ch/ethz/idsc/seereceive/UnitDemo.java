@@ -1,4 +1,5 @@
-package ch.ethz.idsc.seereceive.core;
+// code by jph
+package ch.ethz.idsc.seereceive;
 
 import ch.ethz.idsc.tensor.Scalar;
 import ch.ethz.idsc.tensor.qty.Quantity;

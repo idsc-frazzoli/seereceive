@@ -1,3 +1,4 @@
+// code by clruch
 package ch.ethz.idsc.seereceive.core;
 
 import java.util.Arrays;
