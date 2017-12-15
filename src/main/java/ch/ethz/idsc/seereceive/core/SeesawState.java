@@ -1,3 +1,4 @@
+// code by clruch and jph
 package ch.ethz.idsc.seereceive.core;
 
 import java.nio.ByteBuffer;
