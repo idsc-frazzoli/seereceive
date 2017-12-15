@@ -20,6 +20,8 @@ import ch.ethz.idsc.seereceive.core.SeesawClient;
  * /dev/ttyACM1 */
 public enum SeesawReceive {
   ;
+  private static final String PORT_KEY = "port";
+
   /** @param args
    * @throws FileNotFoundException
    * @throws IOException */
@@ -31,9 +33,20 @@ public enum SeesawReceive {
       port = args[0];
     } else {
       Properties properties = new Properties();
-      properties.load(new FileInputStream(new File("port.properties")));
-      port = properties.getProperty("port");
+      File file = new File("port.properties");
+      if (!file.exists()) {
+        System.err.println("file missing: " + file);
+        System.exit(0);
+      }
+      properties.load(new FileInputStream(file));
+      if (properties.containsKey(PORT_KEY)) {
+        port = properties.getProperty(PORT_KEY);
+      } else {
+        System.err.println(file + " does not specify port");
+        System.exit(0);
+      }
     }
+    System.out.println("using port: " + port);
     RingBufferExchange ringBufferExchange = new FazeClient(port.trim());
     new SeesawClient(ringBufferExchange);
   }

@@ -6,8 +6,7 @@ import java.nio.ByteOrder;
 
 import javax.swing.JOptionPane;
 
-import ch.ethz.idsc.seereceive.utils.SaveUtils;
-import ch.ethz.idsc.seereceive.utils.UserHome;
+import ch.ethz.idsc.seereceive.utils.ExportManager;
 import ch.ethz.idsc.tensor.Tensor;
 import ch.ethz.idsc.tensor.Tensors;
 
@@ -98,7 +97,7 @@ public class SeesawClient implements Runnable {
     System.out.println("numReceived = " + stateReceived.length());
     if (stateReceived.length() == COUNT) {
       try {
-        File dir = SaveUtils.saveFile(stateReceived, "seesawState", UserHome.file(""));
+        File dir = ExportManager.autoSave(stateReceived);
         String string = "files saved in\n" + dir;
         System.out.println(string);
         JOptionPane.showMessageDialog(null, string, "data collection complete", JOptionPane.INFORMATION_MESSAGE);
