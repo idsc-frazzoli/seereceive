@@ -1,11 +1,11 @@
 # seereceive
 Interface for the Seesaw
 
-the master branch, and seesaw.jar in particular, should work for all of the operating systems: ubuntu/mac/windows
+the master branch, and `seesaw.jar` in particular, should work for all of the operating systems: `ubuntu/mac/windows`
 
 ## Instructions
 
-Create a file `port.properties` with the line
+In the same directory where `seesaw.jar` is located, create a file `port.properties` with the line
 
     port=<port of your device>
 
@@ -17,7 +17,7 @@ Then run
 
     java -jar seesaw.jar
 
-After the collection of 3000 data points, the software terminates.
+After the collection of `3000` data points, the software terminates.
 Three files will be created in
 
     <home directory>/seesawState/<timestamp>/*
