@@ -1,7 +1,10 @@
 package ch.ethz.idsc.seereceive.core;
 
+import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+
+import javax.swing.JOptionPane;
 
 import ch.ethz.idsc.seereceive.utils.SaveUtils;
 import ch.ethz.idsc.seereceive.utils.UserHome;
@@ -95,7 +98,11 @@ public class SeesawClient implements Runnable {
     System.out.println("numReceived = " + stateReceived.length());
     if (stateReceived.length() == COUNT) {
       try {
-        SaveUtils.saveFile(stateReceived, "seesawState", UserHome.file(""));
+        File dir = SaveUtils.saveFile(stateReceived, "seesawState", UserHome.file(""));
+        String string = "files saved in\n" + dir;
+        System.out.println(string);
+        JOptionPane.showMessageDialog(null, string, "data collection complete", JOptionPane.INFORMATION_MESSAGE);
+        System.exit(0);
       } catch (Exception ex) {
         ex.printStackTrace();
       }

@@ -17,8 +17,9 @@ public enum SaveUtils {
    * @param name
    * @param saveToFolder
    * @throws Exception */
-  public static void saveFile(Tensor matrix, String name, File saveToFolder) throws Exception {
+  public static File saveFile(Tensor matrix, String name, File saveToFolder) throws Exception {
     saveFile(matrix, name, saveToFolder, SaveFormats.values());
+    return saveToFolder;
   }
 
   /** // TODO make comments.
