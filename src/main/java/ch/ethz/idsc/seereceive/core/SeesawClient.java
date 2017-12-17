@@ -6,7 +6,6 @@ import java.nio.ByteOrder;
 
 import javax.swing.JOptionPane;
 
-import ch.ethz.idsc.seereceive.utils.ExportManager;
 import ch.ethz.idsc.tensor.Tensor;
 import ch.ethz.idsc.tensor.Tensors;
 
