@@ -17,7 +17,7 @@ public class CRCChecker {
   final List<Integer> myList;
 
   static List<Integer> init(int ply) {
-    List<Integer> myList = new ArrayList<Integer>();
+    List<Integer> myList = new ArrayList<>();
     int phi = (ply >> 8) & 0xff;
     // To produce control bytes from every possible top byte
     for (int c1 = 0; c1 < 256; ++c1) {
@@ -72,7 +72,7 @@ public class CRCChecker {
     if (isFinal)
       new Exception("crc already final").printStackTrace();
     for (int idx = 0; idx < length; ++idx)
-      rotate(byte2int(message[offset + idx]));
+      rotate(message[offset + idx] & 0xff);
   }
 
   public int publish() {
@@ -130,16 +130,5 @@ public class CRCChecker {
     ByteBuffer myByteBuffer = ByteBuffer.wrap(message, length, 2);
     myByteBuffer.putShort((short) crc);
     return crc;
-  }
-
-  /** Casts a byte to an unsigned int value. For instance, the byte 0xff will
-   * result in 255 instead of -1
-   * 
-   * @param myByte
-   * the byte, for instance 0xff
-   * @return the non-negative interpretation of byte */
-  private static int byte2int(byte myByte) {
-    int myInt = myByte;
-    return myInt < 0 ? myInt + 256 : myInt;
   }
 }

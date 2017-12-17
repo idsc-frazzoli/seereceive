@@ -1,5 +1,5 @@
 // code by jph
-package ch.ethz.idsc.seereceive.utils;
+package ch.ethz.idsc.seereceive.core;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,6 +7,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import ch.ethz.idsc.seereceive.utils.UserHome;
 import ch.ethz.idsc.tensor.Tensor;
 import ch.ethz.idsc.tensor.io.Export;
 import ch.ethz.idsc.tensor.io.Put;
