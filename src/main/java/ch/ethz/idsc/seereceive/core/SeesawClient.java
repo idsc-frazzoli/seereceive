@@ -1,3 +1,4 @@
+// code by clruch
 package ch.ethz.idsc.seereceive.core;
 
 import java.io.File;
@@ -6,6 +7,7 @@ import java.nio.ByteOrder;
 
 import javax.swing.JOptionPane;
 
+import ch.ethz.idsc.seereceive.util.RingBufferReader;
 import ch.ethz.idsc.tensor.Tensor;
 import ch.ethz.idsc.tensor.Tensors;
 
@@ -14,12 +16,12 @@ public class SeesawClient implements Runnable {
   private static final int hLen = SeesawMessage.headerlength();
   private static final int tLen = SeesawMessage.length() * 2;
   // ---
-  private RingBufferExchange uartServer;
+  private RingBufferReader uartServer;
   public Tensor stateReceived = Tensors.empty();
   private final Thread thread;
 
-  public SeesawClient(RingBufferExchange uartServer) {
-    this.uartServer = uartServer;
+  public SeesawClient(RingBufferReader ringBufferReader) {
+    this.uartServer = ringBufferReader;
     thread = new Thread(this);
     thread.start();
   }
@@ -66,7 +68,7 @@ public class SeesawClient implements Runnable {
     for (int i = 0; i < SeesawMessage.length(); ++i) {
       message[i] = byteBuffer.get(i);
     }
-    CRCChecker myCheck = new CRCChecker();
+    CrcChecker myCheck = new CrcChecker();
     myCheck.update(message, 0, SeesawMessage.length() - 2);
     int crc = myCheck.publish();
     byteBuffer.position(hLen + 4 + 8 + 8 + 8);

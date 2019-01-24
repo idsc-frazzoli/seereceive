@@ -3,7 +3,7 @@ package ch.ethz.idsc.seereceive.core;
 
 import java.util.Arrays;
 
-import ch.ethz.idsc.seereceive.utils.GlobalAssert;
+import ch.ethz.idsc.seereceive.util.GlobalAssert;
 
 public enum SeesawMessage {
   ;

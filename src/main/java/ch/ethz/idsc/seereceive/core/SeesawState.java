@@ -1,4 +1,4 @@
-// code by clruch and jph
+// code by clruch, jph
 package ch.ethz.idsc.seereceive.core;
 
 import java.nio.ByteBuffer;

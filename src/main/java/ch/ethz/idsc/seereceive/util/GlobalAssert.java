@@ -1,7 +1,8 @@
-//code by jph
-package ch.ethz.idsc.seereceive.utils;
+// code by jph
+package ch.ethz.idsc.seereceive.util;
 
-public class GlobalAssert {
+public enum GlobalAssert {
+  ;
   public static void that(boolean status) {
     assert status;
     if (!status)
