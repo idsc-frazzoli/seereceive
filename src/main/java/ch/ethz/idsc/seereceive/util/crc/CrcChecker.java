@@ -1,6 +1,6 @@
 //code by jph
 //adpated by clruch
-package ch.ethz.idsc.seereceive.core;
+package ch.ethz.idsc.seereceive.util.crc;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -1,5 +1,5 @@
 // code by jph
-package ch.ethz.idsc.seereceive.core;
+package ch.ethz.idsc.seereceive.dev.saw;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import ch.ethz.idsc.tensor.io.Export;
 import ch.ethz.idsc.tensor.io.HomeDirectory;
 import ch.ethz.idsc.tensor.io.Put;
 
-public enum ExportManager {
+/* package */ enum ExportManager {
   ;
   private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
 

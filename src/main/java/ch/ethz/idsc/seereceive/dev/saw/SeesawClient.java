@@ -1,5 +1,5 @@
 // code by clruch
-package ch.ethz.idsc.seereceive.core;
+package ch.ethz.idsc.seereceive.dev.saw;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -7,7 +7,8 @@ import java.nio.ByteOrder;
 
 import javax.swing.JOptionPane;
 
-import ch.ethz.idsc.seereceive.util.RingBufferReader;
+import ch.ethz.idsc.seereceive.util.crc.CrcChecker;
+import ch.ethz.idsc.seereceive.util.port.RingBufferReader;
 import ch.ethz.idsc.tensor.Tensor;
 import ch.ethz.idsc.tensor.Tensors;
 

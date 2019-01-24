@@ -1,5 +1,5 @@
 // code by jph
-package ch.ethz.idsc.seereceive.core;
+package ch.ethz.idsc.seereceive.util.crc;
 
 import java.nio.ByteBuffer;
 

@@ -1,19 +1,22 @@
 // code by swisstrolley+
 // code by jph
-package ch.ethz.idsc.seereceive.util;
+package ch.ethz.idsc.seereceive.util.port;
 
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import com.fazecast.jSerialComm.SerialPort;
 
-public class SerialPortWrap implements AutoCloseable, Runnable, SerialPortInterface {
-  private static final int BUFFER_SIZE = 4096;
+public class SerialPortWrap implements Runnable, SerialPortInterface, AutoCloseable {
+  private static final int BUFFER_SIZE = 2048;
   // ---
   private final SerialPort serialPort;
+  private final InputStream inputStream;
+  private final byte[] rxData = new byte[BUFFER_SIZE];
+  private final ByteBuffer byteBuffer = ByteBuffer.wrap(rxData);
   private final Thread thread;
   /** storage of received bytes */
-  private final ByteBuffer byteBuffer = ByteBuffer.wrap(new byte[BUFFER_SIZE]);
   // ---
   private boolean isLaunched = true;
   private int rxHead = 0;
@@ -25,6 +28,7 @@ public class SerialPortWrap implements AutoCloseable, Runnable, SerialPortInterf
     if (!serialPort.isOpen())
       throw new RuntimeException();
     this.serialPort = serialPort;
+    inputStream = serialPort.getInputStream();
     byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
     // ---
     thread = new Thread(this);
@@ -33,31 +37,28 @@ public class SerialPortWrap implements AutoCloseable, Runnable, SerialPortInterf
 
   @Override // from Runnable
   public void run() {
-    byte[] buffer = new byte[1];
-    while (isLaunched) {
-      int nRead = serialPort.readBytes(buffer, 1);
-      if (nRead == 1) {
-        // System.out.println(buffer[0]);
-        synchronized (byteBuffer) {
-          byteBuffer.put(rxHead, buffer[0]);
-          ++rxHead;
-          rxHead %= BUFFER_SIZE;
-          ++nBytesInBuffer;
-        }
-      } else
-        try {
-          Thread.sleep(0, 500_000);
-        } catch (InterruptedException e) {
-          // ---
-        }
+    try {
+      while (isLaunched) {
+        int nRead = inputStream.available();
+        System.out.println(nRead);
+        if (0 < nRead)
+          synchronized (byteBuffer) {
+            int length = Math.min(nRead, rxData.length - rxHead); // max number of bytes to read
+            int rxRead = inputStream.read(rxData, rxHead, length); // number of bytes effectively read
+            rxHead += rxRead;
+            rxHead %= BUFFER_SIZE;
+            ++nBytesInBuffer;
+          }
+        else
+          try {
+            Thread.sleep(2);
+          } catch (InterruptedException e) {
+            // ---
+          }
+      }
+    } catch (Exception exception) {
+      // ---
     }
-  }
-
-  @Override // from AutoCloseable
-  public void close() {
-    isLaunched = false;
-    thread.interrupt();
-    serialPort.closePort();
   }
 
   @Override // from RingBufferExchange
@@ -84,5 +85,12 @@ public class SerialPortWrap implements AutoCloseable, Runnable, SerialPortInterf
   @Override // from RingBufferExchange
   public synchronized int write(byte[] data) {
     return serialPort.writeBytes(data, data.length);
+  }
+
+  @Override // from AutoCloseable
+  public void close() {
+    isLaunched = false;
+    thread.interrupt();
+    serialPort.closePort();
   }
 }

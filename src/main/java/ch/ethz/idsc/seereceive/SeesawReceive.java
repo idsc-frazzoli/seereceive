@@ -10,9 +10,9 @@ import java.util.Properties;
 
 import com.fazecast.jSerialComm.SerialPort;
 
-import ch.ethz.idsc.seereceive.core.SeesawClient;
-import ch.ethz.idsc.seereceive.util.RingBufferReader;
-import ch.ethz.idsc.seereceive.util.SerialPortWrap;
+import ch.ethz.idsc.seereceive.dev.saw.SeesawClient;
+import ch.ethz.idsc.seereceive.util.port.RingBufferReader;
+import ch.ethz.idsc.seereceive.util.port.SerialPortWrap;
 
 /** the port has to be configured and may even change between two connects.
  * 
