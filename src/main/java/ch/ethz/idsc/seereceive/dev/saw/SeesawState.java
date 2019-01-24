@@ -8,7 +8,7 @@ import ch.ethz.idsc.tensor.Tensor;
 import ch.ethz.idsc.tensor.Tensors;
 import ch.ethz.idsc.tensor.qty.Quantity;
 
-public class SeesawState {
+/* package */ class SeesawState {
   private static final double MSEC_to_SEC = 1E-3;
   // ---
   private final long timeStamp;

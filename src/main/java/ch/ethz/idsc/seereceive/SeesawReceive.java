@@ -8,11 +8,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Properties;
 
-import com.fazecast.jSerialComm.SerialPort;
-
 import ch.ethz.idsc.seereceive.dev.saw.SeesawClient;
-import ch.ethz.idsc.seereceive.util.port.RingBufferReader;
-import ch.ethz.idsc.seereceive.util.port.SerialPortWrap;
 
 /** the port has to be configured and may even change between two connects.
  * 
@@ -23,18 +19,6 @@ import ch.ethz.idsc.seereceive.util.port.SerialPortWrap;
 public enum SeesawReceive {
   ;
   private static final String PORT_KEY = "port";
-  private static final int NUM_DATA_BITS = 8;
-  private static final int BAUD_RATE = 9600;
-
-  private static SerialPort create(String port) {
-    SerialPort serialPort = SerialPort.getCommPort(port);
-    serialPort.setComPortParameters(BAUD_RATE, NUM_DATA_BITS, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
-    serialPort.setFlowControl(SerialPort.FLOW_CONTROL_DISABLED);
-    boolean success = serialPort.openPort();
-    if (!success)
-      throw new RuntimeException("cannot open port: " + port);
-    return serialPort;
-  }
 
   /** @param args
    * @throws FileNotFoundException
@@ -61,7 +45,6 @@ public enum SeesawReceive {
       }
     }
     System.out.println("using port: " + port);
-    RingBufferReader ringBufferReader = new SerialPortWrap(create(port.trim()));
-    new SeesawClient(ringBufferReader);
+    new SeesawClient(port.trim());
   }
 }

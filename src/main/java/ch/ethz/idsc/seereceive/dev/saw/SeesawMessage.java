@@ -5,17 +5,17 @@ import java.util.Arrays;
 
 import ch.ethz.idsc.seereceive.util.GlobalAssert;
 
-public enum SeesawMessage {
+/* package */ enum SeesawMessage {
   ;
-  private static final byte[] header = { 'E', 'T', 'H' };
-  private static final int length = 33;
+  private static final int LENGTH = 33;
+  private static final byte[] HEADER = { 'E', 'T', 'H' };
 
   public static int length() {
-    return length;
+    return LENGTH;
   }
 
   public static int headerlength() {
-    return header.length;
+    return HEADER.length;
   }
 
   public static boolean startsWithHeader(byte[] byteMsg) {
@@ -24,7 +24,7 @@ public enum SeesawMessage {
     for (int i = 0; i < headerlength(); ++i) {
       identifier[i] = byteMsg[i];
     }
-    return Arrays.equals(identifier, header);
+    return Arrays.equals(identifier, HEADER);
   }
 
   /** @param byteMsg

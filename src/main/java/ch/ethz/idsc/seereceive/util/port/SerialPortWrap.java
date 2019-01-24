@@ -9,7 +9,7 @@ import java.nio.ByteOrder;
 import com.fazecast.jSerialComm.SerialPort;
 
 public class SerialPortWrap implements Runnable, SerialPortInterface, AutoCloseable {
-  private static final int BUFFER_SIZE = 2048;
+  private static final int BUFFER_SIZE = 4096;
   // ---
   private final SerialPort serialPort;
   private final InputStream inputStream;
@@ -23,7 +23,7 @@ public class SerialPortWrap implements Runnable, SerialPortInterface, AutoClosea
   private int rxTail = 0;
   private int nBytesInBuffer = 0;
 
-  /** @param port for instance "/dev/ttyACM0" */
+  /** @param serialPort open */
   public SerialPortWrap(SerialPort serialPort) {
     if (!serialPort.isOpen())
       throw new RuntimeException();
@@ -40,14 +40,15 @@ public class SerialPortWrap implements Runnable, SerialPortInterface, AutoClosea
     try {
       while (isLaunched) {
         int nRead = inputStream.available();
-        System.out.println(nRead);
+        // System.out.println(nRead);
         if (0 < nRead)
           synchronized (byteBuffer) {
             int length = Math.min(nRead, rxData.length - rxHead); // max number of bytes to read
             int rxRead = inputStream.read(rxData, rxHead, length); // number of bytes effectively read
             rxHead += rxRead;
             rxHead %= BUFFER_SIZE;
-            ++nBytesInBuffer;
+            nBytesInBuffer += rxRead;
+            // System.out.println(nBytesInBuffer);
           }
         else
           try {
