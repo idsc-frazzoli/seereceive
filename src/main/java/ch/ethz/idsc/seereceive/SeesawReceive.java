@@ -8,9 +8,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Properties;
 
-import ch.ethz.idsc.seereceive.core.FazeClient;
-import ch.ethz.idsc.seereceive.core.RingBufferExchange;
-import ch.ethz.idsc.seereceive.core.SeesawClient;
+import ch.ethz.idsc.seereceive.dev.saw.SeesawClient;
 
 /** the port has to be configured and may even change between two connects.
  * 
@@ -47,7 +45,6 @@ public enum SeesawReceive {
       }
     }
     System.out.println("using port: " + port);
-    RingBufferExchange ringBufferExchange = new FazeClient(port.trim());
-    new SeesawClient(ringBufferExchange);
+    new SeesawClient(port.trim());
   }
 }

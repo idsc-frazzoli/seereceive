@@ -1,4 +1,5 @@
-package ch.ethz.idsc.seereceive.core;
+// code by clruch
+package ch.ethz.idsc.seereceive.dev.saw;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -6,20 +7,29 @@ import java.nio.ByteOrder;
 
 import javax.swing.JOptionPane;
 
+import com.fazecast.jSerialComm.SerialPort;
+
+import ch.ethz.idsc.seereceive.util.crc.CrcChecker;
+import ch.ethz.idsc.seereceive.util.port.RingBufferReader;
+import ch.ethz.idsc.seereceive.util.port.SerialPortWrap;
+import ch.ethz.idsc.seereceive.util.port.SerialPorts;
 import ch.ethz.idsc.tensor.Tensor;
 import ch.ethz.idsc.tensor.Tensors;
 
 public class SeesawClient implements Runnable {
+  private static final int BAUD_RATE = 9600;
+  private static final int NUM_DATA_BITS = 8;
   private static final int COUNT = 3000; // TODO magic const
   private static final int hLen = SeesawMessage.headerlength();
   private static final int tLen = SeesawMessage.length() * 2;
   // ---
-  private RingBufferExchange uartServer;
+  private RingBufferReader ringBufferReader;
   public Tensor stateReceived = Tensors.empty();
   private final Thread thread;
 
-  public SeesawClient(RingBufferExchange uartServer) {
-    this.uartServer = uartServer;
+  public SeesawClient(String port) {
+    SerialPort serialPort = SerialPorts.create(port, BAUD_RATE, NUM_DATA_BITS);
+    this.ringBufferReader = new SerialPortWrap(serialPort);
     thread = new Thread(this);
     thread.start();
   }
@@ -28,20 +38,20 @@ public class SeesawClient implements Runnable {
   public void run() {
     while (true) {
       byte[] bytesReceived = new byte[tLen];
-      if (uartServer.peek(bytesReceived, hLen)) {
+      if (ringBufferReader.peek(bytesReceived, hLen)) {
         if (SeesawMessage.startsWithHeader(bytesReceived)) {
           // System.out.println("starts with header");
-          if (uartServer.peek(bytesReceived, tLen)) {
+          if (ringBufferReader.peek(bytesReceived, tLen)) {
             // System.out.println("poll done");
             ByteBuffer byteBuffer = ByteBuffer.wrap(bytesReceived);
             byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
             if (checksumCorrect(byteBuffer)) {
               // System.out.println("checksum ok");
               processMessage(byteBuffer);
-              uartServer.advance(SeesawMessage.length());
+              ringBufferReader.advance(SeesawMessage.length());
             } else {
               System.err.println("checksum nok");
-              uartServer.advance(1);
+              ringBufferReader.advance(1);
             }
           } else {
             // System.out.println("wait");
@@ -49,7 +59,7 @@ public class SeesawClient implements Runnable {
           }
         } else {
           // System.out.println("invalid hdr");
-          uartServer.advance(1);
+          ringBufferReader.advance(1);
         }
       } else {
         try {
@@ -66,7 +76,7 @@ public class SeesawClient implements Runnable {
     for (int i = 0; i < SeesawMessage.length(); ++i) {
       message[i] = byteBuffer.get(i);
     }
-    CRCChecker myCheck = new CRCChecker();
+    CrcChecker myCheck = new CrcChecker();
     myCheck.update(message, 0, SeesawMessage.length() - 2);
     int crc = myCheck.publish();
     byteBuffer.position(hLen + 4 + 8 + 8 + 8);
@@ -92,7 +102,7 @@ public class SeesawClient implements Runnable {
     System.out.println("r = " + seesawState.getReference());
     System.out.println("y = " + seesawState.getMeasurement());
     System.out.println("u = " + seesawState.getControl());
-    uartServer.advance(SeesawMessage.length());
+    ringBufferReader.advance(SeesawMessage.length());
     System.out.println("numReceived = " + stateReceived.length());
     if (stateReceived.length() == COUNT) {
       try {

@@ -1,5 +1,5 @@
-// code by clruch and jph
-package ch.ethz.idsc.seereceive.core;
+// code by clruch, jph
+package ch.ethz.idsc.seereceive.dev.saw;
 
 import java.nio.ByteBuffer;
 
@@ -8,7 +8,7 @@ import ch.ethz.idsc.tensor.Tensor;
 import ch.ethz.idsc.tensor.Tensors;
 import ch.ethz.idsc.tensor.qty.Quantity;
 
-public class SeesawState {
+/* package */ class SeesawState {
   private static final double MSEC_to_SEC = 1E-3;
   // ---
   private final long timeStamp;
