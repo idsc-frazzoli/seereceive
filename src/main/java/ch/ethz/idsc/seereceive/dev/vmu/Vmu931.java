@@ -2,6 +2,8 @@
 package ch.ethz.idsc.seereceive.dev.vmu;
 
 import java.nio.ByteBuffer;
+import java.util.EnumSet;
+import java.util.Set;
 
 import com.fazecast.jSerialComm.SerialPort;
 
@@ -17,39 +19,21 @@ public class Vmu931 implements Runnable {
   private static final int MESSAGE_DATA_END = 4;
   private static final int MESSAGE_TEXT_BEG = 2;
   private static final int MESSAGE_TEXT_END = 3;
-  /** accelerometer */
-  private static final byte TYPE_A = 'a';
-  /** gyroscope */
-  private static final byte TYPE_G = 'g';
-  /** magnetometer */
-  private static final byte TYPE_C = 'c';
-  /** quaternion */
-  private static final byte TYPE_Q = 'q';
-  /** euler angle */
-  private static final byte TYPE_E = 'e';
-  /** heading */
-  private static final byte TYPE_H = 'h';
-  /** self test */
-  private static final byte TYPE_T = 't';
-  /** status of sensor
-   * results in a reply of size == 11 */
-  private static final byte TYPE_S = 's';
   /***************************************************/
+  private final Set<Vmu931Channel> set = EnumSet.noneOf(Vmu931Channel.class);
   private final byte[] data = new byte[256];
   // private final
   private final SerialPortWrap serialPortWrap;
   private final Thread thread;
 
-  public byte[] command(byte type) {
-    return new byte[] { 'v', 'a', 'r', type };
-  }
-
   /** @param serialPort open */
-  public Vmu931(SerialPort serialPort) {
+  public Vmu931(String port, Set<Vmu931Channel> set) {
+    this.set.addAll(set);
+    SerialPort serialPort = SerialPorts.create(port);
     serialPortWrap = new SerialPortWrap(serialPort);
-    serialPortWrap.write(command(TYPE_A));
-    serialPortWrap.write(command(TYPE_H));
-    serialPortWrap.write(command(TYPE_S));
+    serialPortWrap.write(Vmu931Channel.ACCELEROMETER.toggle());
+    serialPortWrap.write(Vmu931Channel.HEADING.toggle());
+    serialPortWrap.write(Vmu931Statics.requestStatus());
     thread = new Thread(this);
     thread.start();
   }
@@ -59,10 +43,10 @@ public class Vmu931 implements Runnable {
     ByteBuffer byteBuffer = ByteBuffer.wrap(data); // big endian
     byteBuffer.position(3);
     switch (type) {
-    case TYPE_A:
-    case TYPE_G:
-    case TYPE_C:
-    case TYPE_E: {
+    case Vmu931Statics.ID_ACCELEROMETER:
+    case Vmu931Statics.ID_GYROSCOPE:
+    case Vmu931Statics.ID_MAGNETOMETER:
+    case Vmu931Statics.ID_EULER_ANGLES: {
       int timestamp_ms = byteBuffer.getInt();
       float x = byteBuffer.getFloat();
       float y = byteBuffer.getFloat();
@@ -70,7 +54,7 @@ public class Vmu931 implements Runnable {
       // System.out.println(type + " " + timestamp_ms + " " + x + " " + y);
       break;
     }
-    case TYPE_Q: {
+    case Vmu931Statics.ID_QUATERNION: {
       int timestamp_ms = byteBuffer.getInt();
       float w = byteBuffer.getFloat();
       float x = byteBuffer.getFloat();
@@ -79,22 +63,41 @@ public class Vmu931 implements Runnable {
       // System.out.println(type + " " + timestamp_ms + " " + x + " " + y);
       break;
     }
-    case TYPE_H: {
+    case Vmu931Statics.ID_HEADING: {
       int timestamp_ms = byteBuffer.getInt();
       float heading = byteBuffer.getFloat(); // in [deg]
       // System.out.println(type + " " + timestamp_ms + " " + heading);
       break;
     }
-    case TYPE_S: {
+    case Vmu931Statics.ID_STATUS: {
       byte status = byteBuffer.get(); // should equal 7 (3 lowest bits set)
       byte resolution = byteBuffer.get();
       byte rate = byteBuffer.get();
       int current = byteBuffer.getInt();
-      System.out.println(type + " " + status + " " + resolution + " " + rate + " " + current);
+      statusCallback(status & 0xff, resolution & 0xff, rate == 1, current & 0xff);
       break;
     }
     default:
       break;
+    }
+  }
+
+  private void statusCallback(int status, int resolution, boolean lowRate, int current) {
+    System.out.println("STATUS= " + status + " " + resolution + " low=" + lowRate + " " + current);
+    boolean isDirty = false;
+    for (Vmu931Channel vmu931Channel : Vmu931Channel.values()) {
+      boolean isActive = vmu931Channel.isActive(current);
+      System.out.println(vmu931Channel.name() + "=" + isActive);
+      if (isActive ^ set.contains(vmu931Channel)) {
+        serialPortWrap.write(vmu931Channel.toggle());
+        isDirty = true;
+      }
+    }
+    if (isDirty) {
+      System.out.println("req status");
+      serialPortWrap.write(Vmu931Statics.requestStatus());
+    } else {
+      System.out.println("device config ok");
     }
   }
 
@@ -157,7 +160,6 @@ public class Vmu931 implements Runnable {
 
   // ---
   public static void main(String[] args) {
-    SerialPort serialPort = SerialPorts.create("/dev/ttyACM0");
-    new Vmu931(serialPort);
+    new Vmu931("/dev/ttyACM0", EnumSet.of(Vmu931Channel.ACCELEROMETER, Vmu931Channel.GYROSCOPE));
   }
 }
